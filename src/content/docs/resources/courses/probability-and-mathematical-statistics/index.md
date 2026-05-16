@@ -1,27 +1,19 @@
 ---
-
 title: 概率论和数理统计
-
 description: 概率论和数理统计课程资料。
-
 ---
 
 ## 资料目录
 
 <div class="tag-list">
-
 <span class="tag">回忆卷</span>
-
 </div>
 
 ## 相关学习经验
 
 - [大三上经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/junior-fall/note-d6c976c8a1/)
-
 - [大三下经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/junior-spring/note-bbc0e40b0d/)
-
 - [大二上经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/sophomore-fall/note-6d5b1e0d9a/)
-
 - [大二下经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/sophomore-spring/note-05506b2a68/)
 
 ## 回忆卷
@@ -29,7 +21,7 @@ description: 概率论和数理统计课程资料。
 <div class="resource-grid">
 <article class="resource-card">
 <div class="resource-card-head">
-<h3>概率论和数理统计回忆卷</h3>
+<h3>概率论和数理统计 回忆卷</h3>
 <div class="resource-meta">
 <span>回忆卷</span>
 <span>PDF</span>
@@ -39,6 +31,10 @@ description: 概率论和数理统计课程资料。
 <div class="resource-actions">
 <a class="primary" href="/CSE_Learning_Resource_Hub/resources/courses/probability-and-mathematical-statistics/memory-exams/probability-memory-8d68adcd.pdf" target="_blank" rel="noopener">预览</a>
 <a href="/CSE_Learning_Resource_Hub/resources/courses/probability-and-mathematical-statistics/memory-exams/probability-memory-8d68adcd.pdf" download>下载</a>
+</div>
+<div class="pdf-preview-wrap">
+<iframe class="pdf-preview" src="/CSE_Learning_Resource_Hub/resources/courses/probability-and-mathematical-statistics/memory-exams/probability-memory-8d68adcd.pdf#toolbar=1&navpanes=0" title="概率论和数理统计 回忆卷 PDF 预览"></iframe>
+<p class="pdf-fallback"><a href="/CSE_Learning_Resource_Hub/resources/courses/probability-and-mathematical-statistics/memory-exams/probability-memory-8d68adcd.pdf" target="_blank" rel="noopener">打开文件</a></p>
 </div>
 </article>
 </div>

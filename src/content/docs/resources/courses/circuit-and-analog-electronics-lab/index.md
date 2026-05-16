@@ -1,27 +1,19 @@
 ---
-
 title: 电路与模拟电子技术实验
-
 description: 电路与模拟电子技术实验课程资料。
-
 ---
 
 ## 资料目录
 
 <div class="tag-list">
-
 <span class="tag">实验资料</span>
-
 </div>
 
 ## 相关学习经验
 
 - [大三上经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/junior-fall/note-d6c976c8a1/)
-
 - [大三下经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/junior-spring/note-bbc0e40b0d/)
-
 - [大二上经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/sophomore-fall/note-6d5b1e0d9a/)
-
 - [大二下经验分享](/CSE_Learning_Resource_Hub/experiences/learning/robotics/sophomore-spring/note-05506b2a68/)
 
 ## 实验资料

@@ -771,6 +771,14 @@ def resource_card(resource: Resource, ordinal: int | None = None) -> str:
         f'<a href="{url}" download>下载</a>',
         "</div>",
     ]
+    if resource.ext == ".pdf":
+        preview_url = f"{url}#toolbar=1&navpanes=0"
+        card.extend([
+            '<div class="pdf-preview-wrap">',
+            f'<iframe class="pdf-preview" src="{preview_url}" title="{title} PDF 预览"></iframe>',
+            f'<p class="pdf-fallback"><a href="{url}" target="_blank" rel="noopener">打开文件</a></p>',
+            "</div>",
+        ])
     card.append("</article>")
     return "\n".join(card)
 
@@ -834,7 +842,7 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
 
 
 _EXPERIENCE_INDEX: list[tuple[str, str, str]] = []
-_LEARNING_BY_SEMESTER: dict[str, list[tuple[str, str]]] = {}
+_LEARNING_BY_SEMESTER: dict[str, list[tuple[str, str, str]]] = {}
 _OTHER_BY_CATEGORY: dict[str, list[tuple[str, str]]] = {}
 
 
@@ -877,7 +885,7 @@ def write_experience_pages(resources: list[Resource]) -> tuple[list[Resource], l
         base_dir = DOCS_ROOT / "experiences" / "learning" / "robotics" / semester_slug
         base_href = f"/experiences/learning/robotics/{semester_slug}"
         title, href, cleaned = write_note(r, base_dir, base_href, f"机器人工程{semester_label}学习经验。")
-        _LEARNING_BY_SEMESTER.setdefault(semester_slug, []).append((title, href))
+        _LEARNING_BY_SEMESTER.setdefault(semester_slug, []).append((title, href, cleaned))
         _EXPERIENCE_INDEX.append((title, href, cleaned))
     for r in other:
         base_dir = DOCS_ROOT / "experiences" / "other" / r.topic_slug
@@ -976,8 +984,14 @@ def write_index_pages(courses: dict[str, dict], course_resources: dict[str, list
         semester_dir = robotics_dir / semester_slug
         semester_dir.mkdir(parents=True, exist_ok=True)
         rows = _LEARNING_BY_SEMESTER.get(semester_slug, [])
-        cards = "\n".join(link_card(title, f"./{href.rstrip('/').split('/')[-1]}/") for title, href in rows)
-        body = ['<div class="cn-grid">', cards, "</div>"] if cards else []
+        body: list[str] = []
+        for title, _, content in rows:
+            body.extend([
+                f"## {title}",
+                "",
+                content.strip(),
+                "",
+            ])
         (semester_dir / "index.md").write_text("\n".join([
             "---",
             f"title: {semester_label}",
@@ -1141,7 +1155,10 @@ def main() -> int:
         return 1
 
     ensure_clean_generated_dirs()
-    files = sorted(p for p in SOURCE_ROOT.rglob("*") if p.is_file())
+    files = sorted(
+        p for p in SOURCE_ROOT.rglob("*")
+        if p.is_file() and p.name.lower() not in {"logo.png", "logo_1.png"}
+    )
     resources: list[Resource] = []
     for path in files:
         sha = sha256_file(path)

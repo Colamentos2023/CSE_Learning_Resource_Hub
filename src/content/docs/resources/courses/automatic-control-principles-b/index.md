@@ -1,21 +1,14 @@
 ---
-
 title: 自动控制理论（乙）
-
 description: 自动控制理论（乙）课程资料。
-
 ---
 
 ## 资料目录
 
 <div class="tag-list">
-
 <span class="tag">课堂笔记</span>
-
 <span class="tag">半开卷 A4</span>
-
 <span class="tag">回忆卷</span>
-
 </div>
 
 ## 相关学习经验
@@ -38,6 +31,10 @@ description: 自动控制理论（乙）课程资料。
 <a class="primary" href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/lecture-notes/automatic-control-notes-93759527.pdf" target="_blank" rel="noopener">预览</a>
 <a href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/lecture-notes/automatic-control-notes-93759527.pdf" download>下载</a>
 </div>
+<div class="pdf-preview-wrap">
+<iframe class="pdf-preview" src="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/lecture-notes/automatic-control-notes-93759527.pdf#toolbar=1&navpanes=0" title="自动控制理论（乙）课堂笔记 PDF 预览"></iframe>
+<p class="pdf-fallback"><a href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/lecture-notes/automatic-control-notes-93759527.pdf" target="_blank" rel="noopener">打开文件</a></p>
+</div>
 </article>
 </div>
 
@@ -57,6 +54,10 @@ description: 自动控制理论（乙）课程资料。
 <a class="primary" href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/open-book-a4/a4-69b9ece3.pdf" target="_blank" rel="noopener">预览</a>
 <a href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/open-book-a4/a4-69b9ece3.pdf" download>下载</a>
 </div>
+<div class="pdf-preview-wrap">
+<iframe class="pdf-preview" src="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/open-book-a4/a4-69b9ece3.pdf#toolbar=1&navpanes=0" title="自动控制理论（乙）半开卷 A4 PDF 预览"></iframe>
+<p class="pdf-fallback"><a href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/open-book-a4/a4-69b9ece3.pdf" target="_blank" rel="noopener">打开文件</a></p>
+</div>
 </article>
 </div>
 
@@ -75,6 +76,10 @@ description: 自动控制理论（乙）课程资料。
 <div class="resource-actions">
 <a class="primary" href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/memory-exams/memory-d78baacd.pdf" target="_blank" rel="noopener">预览</a>
 <a href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/memory-exams/memory-d78baacd.pdf" download>下载</a>
+</div>
+<div class="pdf-preview-wrap">
+<iframe class="pdf-preview" src="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/memory-exams/memory-d78baacd.pdf#toolbar=1&navpanes=0" title="自动控制理论（乙）2024-2025 夏学期期末试题 PDF 预览"></iframe>
+<p class="pdf-fallback"><a href="/CSE_Learning_Resource_Hub/resources/courses/automatic-control-principles-b/memory-exams/memory-d78baacd.pdf" target="_blank" rel="noopener">打开文件</a></p>
 </div>
 </article>
 </div>

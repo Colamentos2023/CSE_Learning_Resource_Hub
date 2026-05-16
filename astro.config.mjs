@@ -11,10 +11,18 @@ export default defineConfig({
       title: 'Control Nexus',
       description: 'A Learning Resource Hub for Control Engineering',
       logo: {
-        src: './src/assets/logo.svg',
+        src: './src/assets/logo.png',
         alt: 'Control Nexus',
       },
-      customCss: ['./src/styles/custom.css'],
+      customCss: [
+        '@fontsource-variable/noto-sans-sc',
+        '@fontsource-variable/orbitron',
+        'aos/dist/aos.css',
+        './src/styles/custom.css',
+      ],
+      components: {
+        Head: './src/components/Head.astro',
+      },
       social: [
         {
           icon: 'github',

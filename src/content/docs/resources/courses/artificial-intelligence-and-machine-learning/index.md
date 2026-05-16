@@ -1,17 +1,12 @@
 ---
-
 title: 人工智能与机器学习
-
 description: 人工智能与机器学习课程资料。
-
 ---
 
 ## 资料目录
 
 <div class="tag-list">
-
 <span class="tag">复习提纲</span>
-
 </div>
 
 ## 相关学习经验
@@ -33,6 +28,10 @@ description: 人工智能与机器学习课程资料。
 <div class="resource-actions">
 <a class="primary" href="/CSE_Learning_Resource_Hub/resources/courses/artificial-intelligence-and-machine-learning/review-outline/review-outline-ce2b12a3.pdf" target="_blank" rel="noopener">预览</a>
 <a href="/CSE_Learning_Resource_Hub/resources/courses/artificial-intelligence-and-machine-learning/review-outline/review-outline-ce2b12a3.pdf" download>下载</a>
+</div>
+<div class="pdf-preview-wrap">
+<iframe class="pdf-preview" src="/CSE_Learning_Resource_Hub/resources/courses/artificial-intelligence-and-machine-learning/review-outline/review-outline-ce2b12a3.pdf#toolbar=1&navpanes=0" title="人工智能与机器学习复习提纲 PDF 预览"></iframe>
+<p class="pdf-fallback"><a href="/CSE_Learning_Resource_Hub/resources/courses/artificial-intelligence-and-machine-learning/review-outline/review-outline-ce2b12a3.pdf" target="_blank" rel="noopener">打开文件</a></p>
 </div>
 </article>
 </div>

@@ -4,9 +4,9 @@ description: A Learning Resource Hub for Control Engineering
 template: splash
 hero:
   title: Control Nexus
-  tagline: 智控学园 · A Learning Resource Hub for Control Engineering
+  tagline: <span class="cn-hero-cn">智控学园</span><span class="cn-hero-en">A Learning Resource Hub for Control Engineering</span>
   image:
-    file: ../../assets/logo.svg
+    file: ../../assets/logo_1.png
   actions:
     - text: 浏览学习资料
       link: /CSE_Learning_Resource_Hub/resources/

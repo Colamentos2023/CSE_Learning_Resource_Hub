@@ -12,8 +12,12 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.37.6",
+    "@fontsource-variable/noto-sans-sc": "^5.2.10",
+    "@fontsource-variable/orbitron": "^5.2.8",
+    "aos": "^2.3.4",
     "astro": "^5.6.1",
+    "canvas-confetti": "^1.9.4",
+    "cursor-effects": "^1.0.18",
     "sharp": "^0.34.2"
-  },
-  "devDependencies": {}
+  }
 }
