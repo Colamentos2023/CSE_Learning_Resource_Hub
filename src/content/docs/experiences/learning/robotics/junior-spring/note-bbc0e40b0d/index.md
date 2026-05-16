@@ -1,13 +1,7 @@
 ---
 title: 大三下经验分享
-description: 学习经验。
+description: 机器人工程大三下学习经验。
 ---
-
-# 大三下经验分享
-
-> 原始文件：`大三下经验分享.md`。历史外链未逐一验证，可能已失效。
-
-[下载原始文件](/CSE_Learning_Resource_Hub/resources/experiences/learning/study-experience/resource-bbc0e40b0d-bbc0e40b.md)
 
 \## 前言
 

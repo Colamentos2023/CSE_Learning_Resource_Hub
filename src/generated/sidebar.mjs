@@ -76,8 +76,29 @@ export const generatedSidebar = [
     "label": "学习经验",
     "items": [
       {
-        "label": "学习经验索引",
-        "slug": "experiences/learning"
+        "label": "自动化",
+        "slug": "experiences/learning/automation"
+      },
+      {
+        "label": "机器人工程",
+        "items": [
+          {
+            "label": "大二上",
+            "slug": "experiences/learning/robotics/sophomore-fall"
+          },
+          {
+            "label": "大二下",
+            "slug": "experiences/learning/robotics/sophomore-spring"
+          },
+          {
+            "label": "大三上",
+            "slug": "experiences/learning/robotics/junior-fall"
+          },
+          {
+            "label": "大三下",
+            "slug": "experiences/learning/robotics/junior-spring"
+          }
+        ]
       }
     ]
   },
@@ -85,8 +106,36 @@ export const generatedSidebar = [
     "label": "其他经验",
     "items": [
       {
-        "label": "其他经验索引",
-        "slug": "experiences/other"
+        "label": "六级",
+        "slug": "experiences/other/cet6"
+      },
+      {
+        "label": "面试",
+        "slug": "experiences/other/interview"
+      },
+      {
+        "label": "升学",
+        "slug": "experiences/other/postgraduate"
+      },
+      {
+        "label": "就业",
+        "slug": "experiences/other/employment"
+      },
+      {
+        "label": "考研",
+        "slug": "experiences/other/postgraduate-exam"
+      },
+      {
+        "label": "竞赛",
+        "slug": "experiences/other/competition"
+      },
+      {
+        "label": "工具与方法",
+        "slug": "experiences/other/tools-and-methods"
+      },
+      {
+        "label": "其他",
+        "slug": "experiences/other/other"
       }
     ]
   },

@@ -41,9 +41,22 @@ OTHER_CATEGORIES = [
     ("interview", "面试"),
     ("postgraduate", "升学"),
     ("employment", "就业"),
+    ("postgraduate-exam", "考研"),
     ("competition", "竞赛"),
     ("tools-and-methods", "工具与方法"),
     ("other", "其他"),
+]
+
+LEARNING_MAJORS = [
+    ("automation", "自动化"),
+    ("robotics", "机器人工程"),
+]
+
+SEMESTER_ORDER = [
+    ("sophomore-fall", "大二上"),
+    ("sophomore-spring", "大二下"),
+    ("junior-fall", "大三上"),
+    ("junior-spring", "大三下"),
 ]
 
 KNOWN_COURSES = [
@@ -283,7 +296,9 @@ def infer_experience(path: Path, rel: str) -> tuple[str, str, str]:
         if re.search(r"(PhD|港科|升学|保研|直博|提前批)", text, re.I):
             return "other", "postgraduate", "升学"
         return "other", "interview", "面试"
-    if re.search(r"(升学|保研|直博|PhD|港科|考研)", text, re.I):
+    if re.search(r"(考研)", text, re.I):
+        return "other", "postgraduate-exam", "考研"
+    if re.search(r"(升学|保研|直博|PhD|港科)", text, re.I):
         return "other", "postgraduate", "升学"
     if re.search(r"(就业|实习|求职)", text):
         return "other", "employment", "就业"
@@ -294,6 +309,19 @@ def infer_experience(path: Path, rel: str) -> tuple[str, str, str]:
     if re.search(r"(大二|大三|学习经验|经验分享|上课体验|避坑|备考经验)", text):
         return "learning", "study-experience", "学习经验"
     return "", "", ""
+
+
+def infer_learning_semester(resource: Resource) -> tuple[str, str]:
+    text = f"{resource.rel} {resource.name}"
+    if "大二上" in text:
+        return "sophomore-fall", "大二上"
+    if "大二下" in text:
+        return "sophomore-spring", "大二下"
+    if "大三上" in text:
+        return "junior-fall", "大三上"
+    if "大三下" in text:
+        return "junior-spring", "大三下"
+    return "other", "其他"
 
 
 def classify(path: Path, sha: str) -> Resource:
@@ -366,8 +394,8 @@ def ensure_clean_generated_dirs() -> None:
         PUBLIC_RESOURCES,
         DOCS_ROOT / "resources" / "courses",
         DOCS_ROOT / "resources" / "pending",
-        DOCS_ROOT / "experiences" / "learning" / "notes",
-        DOCS_ROOT / "experiences" / "other" / "notes",
+        DOCS_ROOT / "experiences" / "learning",
+        DOCS_ROOT / "experiences" / "other",
         DOCS_ROOT / "internal",
     ]:
         if path.exists():
@@ -449,20 +477,19 @@ def resource_card(resource: Resource) -> str:
     title = html.escape(Path(resource.name).stem)
     url = html.escape(resource.public_url)
     kind = resource.ext.upper().lstrip(".") or "附件"
-    desc = "资料说明待补充"
-    original = html.escape(resource.rel)
+    label = html.escape(resource.module_label or resource.topic_label or "资料")
     card = [
-        '<div class="resource-card">',
+        '<article class="resource-card">',
+        '<div class="resource-card-head">',
         f"<h3>{title}</h3>",
         '<div class="resource-meta">',
-        f"<span>{html.escape(resource.module_label or resource.topic_label or '资料')}</span>",
+        f"<span>{label}</span>",
         f"<span>{kind}</span>",
         f"<span>{resource.size_label}</span>",
         "</div>",
-        f"<p>{desc}</p>",
-        f'<p class="cn-muted">原始路径：{original}</p>',
+        "</div>",
         '<div class="resource-actions">',
-        f'<a href="{url}" target="_blank" rel="noopener">打开</a>',
+        f'<a class="primary" href="{url}" target="_blank" rel="noopener">预览</a>',
         f'<a href="{url}" download>下载</a>',
         "</div>",
     ]
@@ -472,7 +499,7 @@ def resource_card(resource: Resource) -> str:
             f'<p>当前浏览器不支持内嵌 PDF 预览，请 <a href="{url}">下载文件</a> 查看。</p>',
             "</object>",
         ])
-    card.append("</div>")
+    card.append("</article>")
     return "\n".join(card)
 
 
@@ -491,7 +518,6 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
         course_dir = courses_dir / slug
         course_dir.mkdir(parents=True, exist_ok=True)
         items = [r for r in course_resources.get(slug, []) if r.included]
-        skipped = [r for r in course_resources.get(slug, []) if not r.included]
         by_module: dict[str, list[Resource]] = {}
         for item in items:
             by_module.setdefault(item.module_label, []).append(item)
@@ -503,20 +529,6 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
             f"description: {info['name']}课程资料。",
             "---",
             "",
-            f"# {info['name']}",
-            "",
-            "## 课程简介",
-            "",
-            "待补充。",
-            "",
-            "## 适用对象",
-            "",
-            "待补充。",
-            "",
-            "## 前置知识",
-            "",
-            "待补充。",
-            "",
             "## 资料目录",
             "",
         ]
@@ -524,8 +536,6 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
             lines.append('<div class="tag-list">')
             lines.extend(f'<span class="tag">{html.escape(tag)}</span>' for tag in tags)
             lines.append("</div>")
-        else:
-            lines.append("暂无可公开资料。")
         lines.append("")
 
         related_links = related_experience_links(info["name"])
@@ -542,20 +552,14 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
             lines.extend(resource_card(item) for item in module_items)
             lines.extend(["</div>", ""])
 
-        large_skipped = [r for r in skipped if r.size > LARGE_LIMIT]
-        if large_skipped:
-            lines.extend(["## 待补充的大文件", ""])
-            lines.append("以下资料文件过大，待压缩或外部托管后补充：")
-            lines.append("")
-            lines.extend(f"- `{r.rel}`（{r.size_label}）" for r in large_skipped)
-            lines.append("")
-
         (course_dir / "index.md").write_text("\n".join(lines), encoding="utf-8")
 
     return courses, course_resources
 
 
 _EXPERIENCE_INDEX: list[tuple[str, str, str]] = []
+_LEARNING_BY_SEMESTER: dict[str, list[tuple[str, str]]] = {}
+_OTHER_BY_CATEGORY: dict[str, list[tuple[str, str]]] = {}
 
 
 def related_experience_links(course_name: str) -> list[tuple[str, str]]:
@@ -571,10 +575,12 @@ def write_experience_pages(resources: list[Resource]) -> tuple[list[Resource], l
     learning = [r for r in resources if r.area == "learning" and r.ext in TEXT_EXTENSIONS and r.included]
     other = [r for r in resources if r.area == "other" and r.ext in TEXT_EXTENSIONS and r.included]
     _EXPERIENCE_INDEX.clear()
+    _LEARNING_BY_SEMESTER.clear()
+    _OTHER_BY_CATEGORY.clear()
 
-    def write_one(resource: Resource, base_dir: Path, base_href: str) -> tuple[str, str, str]:
+    def write_note(resource: Resource, page_dir: Path, href: str, description: str) -> tuple[str, str, str]:
         slug = page_slug_for_resource(resource)
-        page_dir = base_dir / "notes" / slug
+        page_dir = page_dir / slug
         page_dir.mkdir(parents=True, exist_ok=True)
         raw = read_text_file(resource.source)
         cleaned = clean_markdown(raw)
@@ -582,27 +588,41 @@ def write_experience_pages(resources: list[Resource]) -> tuple[list[Resource], l
         content = "\n".join([
             "---",
             f"title: {title}",
-            f"description: {resource.topic_label}。",
+            f"description: {description}",
             "---",
-            "",
-            f"# {title}",
-            "",
-            f"> 原始文件：`{resource.rel}`。历史外链未逐一验证，可能已失效。",
-            "",
-            f"[下载原始文件]({resource.public_url})",
             "",
             cleaned,
         ])
         (page_dir / "index.md").write_text(content, encoding="utf-8")
-        href = f"{base_href}/notes/{slug}/"
-        return title, href, cleaned
+        return title, f"{href}/{slug}/", cleaned
 
     for r in learning:
-        _EXPERIENCE_INDEX.append(write_one(r, DOCS_ROOT / "experiences" / "learning", "/experiences/learning"))
+        semester_slug, semester_label = infer_learning_semester(r)
+        base_dir = DOCS_ROOT / "experiences" / "learning" / "robotics" / semester_slug
+        base_href = f"/experiences/learning/robotics/{semester_slug}"
+        title, href, cleaned = write_note(r, base_dir, base_href, f"机器人工程{semester_label}学习经验。")
+        _LEARNING_BY_SEMESTER.setdefault(semester_slug, []).append((title, href))
+        _EXPERIENCE_INDEX.append((title, href, cleaned))
     for r in other:
-        _EXPERIENCE_INDEX.append(write_one(r, DOCS_ROOT / "experiences" / "other", "/experiences/other"))
+        base_dir = DOCS_ROOT / "experiences" / "other" / r.topic_slug
+        base_href = f"/experiences/other/{r.topic_slug}"
+        title, href, cleaned = write_note(r, base_dir, base_href, f"{r.topic_label}经验资料。")
+        _OTHER_BY_CATEGORY.setdefault(r.topic_slug, []).append((title, href))
+        _EXPERIENCE_INDEX.append((title, href, cleaned))
 
     return learning, other
+
+
+def link_card(title: str, href: str, tags: Iterable[str] = ()) -> str:
+    tag_html = "".join(f'<span class="tag">{html.escape(tag)}</span>' for tag in tags)
+    tag_block = f'<div class="tag-list">{tag_html}</div>' if tag_html else ""
+    return "\n".join([
+        '<div class="cn-card">',
+        f"<h3>{html.escape(title)}</h3>",
+        tag_block,
+        f'<a href="{href}">进入</a>',
+        "</div>",
+    ])
 
 
 def write_index_pages(courses: dict[str, dict], course_resources: dict[str, list[Resource]], resources: list[Resource]) -> None:
@@ -613,12 +633,12 @@ def write_index_pages(courses: dict[str, dict], course_resources: dict[str, list
         for _, label in TYPE_ORDER:
             if any(r.module_label == label for r in included):
                 labels.append(label)
-        tags = "\n".join(f'<span class="tag">{html.escape(label)}</span>' for label in labels) or '<span class="tag">待补充</span>'
+        tags = "\n".join(f'<span class="tag">{html.escape(label)}</span>' for label in labels)
+        tag_block = f'<div class="tag-list">{tags}</div>' if tags else ""
         course_cards.append("\n".join([
             '<div class="cn-card">',
             f"<h3>{html.escape(info['name'])}</h3>",
-            "<p>课程简介待补充。</p>",
-            f'<div class="tag-list">{tags}</div>',
+            tag_block,
             f'<a href="./courses/{slug}/">进入课程页面</a>',
             "</div>",
         ]))
@@ -629,33 +649,21 @@ def write_index_pages(courses: dict[str, dict], course_resources: dict[str, list
         "description: 按课程组织的学习资料索引。",
         "---",
         "",
-        "# 学习资料",
-        "",
-        "不同课程以并列关系组织。同一课程内按统一资料类型展示，PDF 提供在线预览和下载入口。",
-        "",
         '<div class="cn-grid">',
         *course_cards,
         "</div>",
     ])
     (DOCS_ROOT / "resources" / "index.md").write_text(resources_index, encoding="utf-8")
 
-    learning_pages = [(title, href) for title, href, _ in _EXPERIENCE_INDEX if href.startswith("/experiences/learning")]
-    learning_cards_list = []
-    for title, href in learning_pages:
-        note_slug = href.rstrip("/").split("/")[-1]
-        learning_cards_list.append(
-            f'<div class="cn-card"><h3>{html.escape(title)}</h3><p>学习经验正文保持原文为主，仅做必要排版整理。</p><a href="./notes/{note_slug}/">阅读</a></div>'
-        )
-    learning_cards = "\n".join(learning_cards_list) or '<p>暂无学习经验页面。</p>'
+    learning_cards = "\n".join([
+        link_card("自动化", "./automation/"),
+        link_card("机器人工程", "./robotics/", [label for _, label in SEMESTER_ORDER]),
+    ])
     learning_index = "\n".join([
         "---",
         "title: 学习经验",
         "description: 课程学习、备考、上课体验与避坑指南。",
         "---",
-        "",
-        "# 学习经验",
-        "",
-        "本模块主要收纳课程学习方法、备考经验、上课体验和避坑指南。若正文中明显提到某门课程，会在课程页面中建立相关链接。",
         "",
         '<div class="cn-grid">',
         learning_cards,
@@ -663,40 +671,78 @@ def write_index_pages(courses: dict[str, dict], course_resources: dict[str, list
     ])
     (DOCS_ROOT / "experiences" / "learning" / "index.md").write_text(learning_index, encoding="utf-8")
 
-    other_by_cat: dict[str, list[tuple[str, str]]] = {slug: [] for slug, _ in OTHER_CATEGORIES}
-    for title, href, _ in _EXPERIENCE_INDEX:
-        if not href.startswith("/experiences/other"):
-            continue
-        match = next((r for r in resources if r.included and r.area == "other" and page_slug_for_resource(r) in href), None)
-        if match:
-            other_by_cat.setdefault(match.topic_slug, []).append((title, href))
-    other_sections = []
-    for slug, label in OTHER_CATEGORIES:
-        rows = other_by_cat.get(slug, [])
-        other_sections.extend([f"## {label}", ""])
-        if rows:
-            other_sections.append('<div class="cn-grid">')
-            for title, href in rows:
-                note_slug = href.rstrip("/").split("/")[-1]
-                other_sections.append(f'<div class="cn-card"><h3>{html.escape(title)}</h3><p>{label}相关资料。</p><a href="./notes/{note_slug}/">阅读</a></div>')
-            other_sections.append("</div>")
-        else:
-            other_sections.append("待补充。")
-        other_sections.append("")
+    automation_dir = DOCS_ROOT / "experiences" / "learning" / "automation"
+    automation_dir.mkdir(parents=True, exist_ok=True)
+    (automation_dir / "index.md").write_text("\n".join([
+        "---",
+        "title: 自动化",
+        "description: 自动化专业学习经验。",
+        "---",
+        "",
+    ]), encoding="utf-8")
 
+    robotics_dir = DOCS_ROOT / "experiences" / "learning" / "robotics"
+    robotics_dir.mkdir(parents=True, exist_ok=True)
+    robotics_cards = "\n".join(link_card(label, f"./{slug}/") for slug, label in SEMESTER_ORDER)
+    (robotics_dir / "index.md").write_text("\n".join([
+        "---",
+        "title: 机器人工程",
+        "description: 机器人工程专业学习经验。",
+        "---",
+        "",
+        '<div class="cn-grid">',
+        robotics_cards,
+        "</div>",
+        "",
+    ]), encoding="utf-8")
+
+    for semester_slug, semester_label in SEMESTER_ORDER:
+        semester_dir = robotics_dir / semester_slug
+        semester_dir.mkdir(parents=True, exist_ok=True)
+        rows = _LEARNING_BY_SEMESTER.get(semester_slug, [])
+        cards = "\n".join(link_card(title, f"./{href.rstrip('/').split('/')[-1]}/") for title, href in rows)
+        body = ['<div class="cn-grid">', cards, "</div>"] if cards else []
+        (semester_dir / "index.md").write_text("\n".join([
+            "---",
+            f"title: {semester_label}",
+            f"description: 机器人工程{semester_label}学习经验。",
+            "---",
+            "",
+            *body,
+            "",
+        ]), encoding="utf-8")
+
+    other_cards = "\n".join(link_card(label, f"./{slug}/") for slug, label in OTHER_CATEGORIES)
     other_index = "\n".join([
         "---",
         "title: 其他经验",
-        "description: 六级、面试、升学、就业、竞赛、工具与方法等非课程资料。",
+        "description: 六级、面试、升学、就业、考研、竞赛、工具与方法等非课程资料。",
         "---",
         "",
-        "# 其他经验",
-        "",
-        "非具体课程但对学生有帮助的资料统一放在这里；无法准确归类的资料放入“其他”。",
-        "",
-        *other_sections,
+        '<div class="cn-grid">',
+        other_cards,
+        "</div>",
     ])
     (DOCS_ROOT / "experiences" / "other" / "index.md").write_text(other_index, encoding="utf-8")
+
+    for slug, label in OTHER_CATEGORIES:
+        category_dir = DOCS_ROOT / "experiences" / "other" / slug
+        category_dir.mkdir(parents=True, exist_ok=True)
+        rows = _OTHER_BY_CATEGORY.get(slug, [])
+        if rows:
+            cards = "\n".join(link_card(title, f"./{href.rstrip('/').split('/')[-1]}/") for title, href in rows)
+            body = ['<div class="cn-grid">', cards, "</div>"]
+        else:
+            body = []
+        (category_dir / "index.md").write_text("\n".join([
+            "---",
+            f"title: {label}",
+            f"description: {label}相关经验资料。",
+            "---",
+            "",
+            *body,
+            "",
+        ]), encoding="utf-8")
 
     pending = [r for r in resources if r.area == "pending"]
     if pending:
@@ -708,8 +754,6 @@ def write_index_pages(courses: dict[str, dict], course_resources: dict[str, list
             "title: 待分类资料",
             "description: 尚未能自动判断课程或类型的资料。",
             "---",
-            "",
-            "# 待分类资料",
             "",
             "以下资料暂未能自动判断课程或类型，后续可人工移动到对应课程页面。",
             "",
@@ -731,8 +775,17 @@ def write_sidebar(courses: dict[str, dict], resources: list[Resource]) -> None:
     sidebar = [
         {"label": "首页", "slug": "index"},
         {"label": "学习资料", "items": [{"label": "课程索引", "slug": "resources"}, *course_items]},
-        {"label": "学习经验", "items": [{"label": "学习经验索引", "slug": "experiences/learning"}]},
-        {"label": "其他经验", "items": [{"label": "其他经验索引", "slug": "experiences/other"}]},
+        {"label": "学习经验", "items": [
+            {"label": "自动化", "slug": "experiences/learning/automation"},
+            {"label": "机器人工程", "items": [
+                {"label": label, "slug": f"experiences/learning/robotics/{slug}"}
+                for slug, label in SEMESTER_ORDER
+            ]},
+        ]},
+        {"label": "其他经验", "items": [
+            {"label": label, "slug": f"experiences/other/{slug}"}
+            for slug, label in OTHER_CATEGORIES
+        ]},
         {"label": "资料贡献", "slug": "contribute"},
         {"label": "关于项目", "slug": "about"},
     ]

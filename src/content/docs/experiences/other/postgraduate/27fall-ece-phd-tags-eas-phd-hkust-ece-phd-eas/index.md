@@ -1,13 +1,7 @@
 ---
 title: 27fall 港科ECE PhD提前批一面经（tags：香港科技大学  港科  港科大  EAS  PhD  提前批  HKUST  ECE  PhD-EAS）
-description: 升学。
+description: 升学经验资料。
 ---
-
-# 27fall 港科ECE PhD提前批一面经（tags：香港科技大学  港科  港科大  EAS  PhD  提前批  HKUST  ECE  PhD-EAS）
-
-> 原始文件：`27fall 港科ECE PhD提前批一面经（tags：香港科技大学  港科  港科大  EAS  PhD  提前批  HKUST  ECE  PhD-EAS）.md`。历史外链未逐一验证，可能已失效。
-
-[下载原始文件](/CSE_Learning_Resource_Hub/resources/experiences/other/postgraduate/27fall-ece-phd-tags-eas-phd-hkust-ece-phd-eas-9079f28e.md)
 
 感谢@千朝一梦 学长的分享，【留学交流】港科ECE PhD提前批一面面经（搜索关键词：香港科技大学  港科  港科大  EAS  PhD  提前批  HKUST  ECE  PhD-EAS） [https://www.cc98.org/topic/6171726](https://www.cc98.org/topic/6171726) 复制本链接到浏览器或者打开【CC98】微信小程序查看\~
 
