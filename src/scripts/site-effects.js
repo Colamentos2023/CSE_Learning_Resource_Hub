@@ -51,6 +51,15 @@ function enhancePointerGlow() {
     glow.dataset.active = 'false';
   });
 
+  document.querySelectorAll('.pdf-preview').forEach((preview) => {
+    preview.addEventListener('pointerenter', () => {
+      glow.dataset.active = 'false';
+    });
+    preview.addEventListener('mouseenter', () => {
+      glow.dataset.active = 'false';
+    });
+  });
+
   const render = () => {
     currentX += (nextX - currentX) * 0.3;
     currentY += (nextY - currentY) * 0.3;
@@ -102,6 +111,15 @@ function enhanceCursorDot() {
 
   window.addEventListener('pointerleave', () => {
     dot.dataset.active = 'false';
+  });
+
+  document.querySelectorAll('.pdf-preview').forEach((preview) => {
+    const hideDot = () => {
+      dot.dataset.active = 'false';
+      dot.dataset.press = 'false';
+    };
+    preview.addEventListener('pointerenter', hideDot);
+    preview.addEventListener('mouseenter', hideDot);
   });
 
   const render = () => {
