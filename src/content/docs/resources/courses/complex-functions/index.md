@@ -197,6 +197,23 @@ description: 复变函数课程资料。
 
 <div class="resource-grid">
 <div class="resource-card">
+<h3>Stein答案1</h3>
+<div class="resource-meta">
+<span>作业与习题</span>
+<span>PDF</span>
+<span>241.6 KiB</span>
+</div>
+<p>资料说明待补充</p>
+<p class="cn-muted">原始路径：复变函数/复变函数/Stein答案1.pdf</p>
+<div class="resource-actions">
+<a href="/CSE_Learning_Resource_Hub/resources/courses/complex-functions/assignments/stein-answers-1-d81b4541.pdf" target="_blank" rel="noopener">打开</a>
+<a href="/CSE_Learning_Resource_Hub/resources/courses/complex-functions/assignments/stein-answers-1-d81b4541.pdf" download>下载</a>
+</div>
+<object class="pdf-preview" data="/CSE_Learning_Resource_Hub/resources/courses/complex-functions/assignments/stein-answers-1-d81b4541.pdf" type="application/pdf">
+<p>当前浏览器不支持内嵌 PDF 预览，请 <a href="/CSE_Learning_Resource_Hub/resources/courses/complex-functions/assignments/stein-answers-1-d81b4541.pdf">下载文件</a> 查看。</p>
+</object>
+</div>
+<div class="resource-card">
 <h3>Stein答案2</h3>
 <div class="resource-meta">
 <span>作业与习题</span>

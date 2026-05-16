@@ -68,6 +68,10 @@ TEXT_EXTENSIONS = {".md", ".txt"}
 ATTACHMENT_EXTENSIONS = {".pdf", ".docx", ".pptx", ".zip", ".jpg", ".jpeg", ".png", ".agx", ".mo", ".ms14"}
 LARGE_LIMIT = 50 * 1024 * 1024
 HARD_LIMIT = 100 * 1024 * 1024
+PRIVACY_ALLOWLIST = {
+    "复变函数/复变函数/Stein答案1.pdf": "人工确认可公开",
+    "机器人学II_复习提纲.pdf": "人工确认可公开；“二维码”为课程内容语境",
+}
 
 
 @dataclass
@@ -395,6 +399,9 @@ def privacy_scan(resource: Resource) -> None:
         resource.notes.append("未知格式，按附件处理")
 
     resource.privacy_hits = scan_text_for_privacy(text[:1_000_000], resource.name)
+    if resource.rel in PRIVACY_ALLOWLIST and resource.privacy_hits:
+        resource.notes.append(f"隐私规则命中已人工放行：{PRIVACY_ALLOWLIST[resource.rel]}")
+        resource.privacy_hits = []
     if resource.privacy_hits:
         resource.notes.append("疑似包含敏感信息，未纳入公开资源")
 

@@ -57,7 +57,8 @@ description: 按课程组织的学习资料索引。
 <div class="cn-card">
 <h3>机器人学 II</h3>
 <p>课程简介待补充。</p>
-<div class="tag-list"><span class="tag">半开卷 A4</span>
+<div class="tag-list"><span class="tag">复习提纲</span>
+<span class="tag">半开卷 A4</span>
 <span class="tag">回忆卷</span></div>
 <a href="./courses/robotics-ii/">进入课程页面</a>
 </div>
