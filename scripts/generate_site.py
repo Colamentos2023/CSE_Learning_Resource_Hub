@@ -104,6 +104,7 @@ class Resource:
     topic_label: str = ""
     included: bool = False
     dest_rel: str = ""
+    text_excerpt: str = ""
     notes: list[str] = field(default_factory=list)
     privacy_hits: list[str] = field(default_factory=list)
 
@@ -378,11 +379,64 @@ def resource_dest(resource: Resource, seen_dest_names: set[str]) -> str:
 
 def clean_markdown(text: str) -> str:
     text = text.replace("\ufeff", "")
+    text = text.replace(r"\~\~", "~~")
     text = re.sub(r"\[b\](.*?)\[/b\]", r"**\1**", text, flags=re.I | re.S)
     text = re.sub(r"\[/?(?:color|size|font)[^\]]*\]", "", text, flags=re.I)
     text = re.sub(r"(?<![\]\)])(https?://[^\s<>\)]+)", r"[\1](\1)", text)
+    text = unescape_markdown_syntax(text)
+    text = reduce_double_escapes(text)
+    text = escape_algorithm_stars(text)
+    text = re.sub(r"\[([^\]]+)\]\(\[(https?://[^\]]+)\]\(\2\)\)", r"[\1](\2)", text)
+    text = re.sub(r"\]\(\s*\[(https?://[^\]]+)\]\(\1\)\s*\)", r"](\1)", text)
+    text = re.sub(r"(?m)^(#{1,6})(\S)", r"\1 \2", text)
+    text = re.sub(r"(?m)^# #\s*", "## ", text)
+    text = re.sub(r"(?m)^## #\s*", "### ", text)
+    text = normalize_for_commonmark(text)
+    text = re.sub(r"\\\*\\\*(?=的第)", "", text)
     text = re.sub(r"\n{4,}", "\n\n", text)
     return text.strip() + "\n"
+
+
+def unescape_markdown_syntax(text: str) -> str:
+    """Restore Markdown syntax escaped by upstream forum exports."""
+    replacements = {
+        r"\#": "#",
+        r"\*": "*",
+        r"\[": "[",
+        r"\]": "]",
+        r"\(": "(",
+        r"\)": ")",
+        r"\.": ".",
+        r"\-": "-",
+        r"\_": "_",
+        r"\&": "&",
+    }
+    for escaped, literal in replacements.items():
+        text = text.replace(escaped, literal)
+    return text
+
+
+def normalize_for_commonmark(text: str) -> str:
+    """Convert forum-flavored snippets into Markdown that Starlight renders."""
+    text = re.sub(r"(?m)^\*\*\s*·\s*([^*\n]+?)\*\*\s*", r"- **\1** ", text)
+    text = re.sub(r"(?<=\d)~(?=\d)", "～", text)
+    return text
+
+
+def reduce_double_escapes(text: str) -> str:
+    """Collapse doubled escape markers left by nested Markdown exports."""
+    for marker in ("*", "_", "[", "]", "(", ")", "&"):
+        text = text.replace("\\\\" + marker, "\\" + marker)
+    return text
+
+
+def escape_algorithm_stars(text: str) -> str:
+    """Keep names like A*, D*Lite, and rrt* from becoming emphasis."""
+    return re.sub(
+        r"(?<!\\)\b([A-Za-z][A-Za-z0-9-]*)(?=\*)\*(?=[A-Za-z0-9\u4e00-\u9fff、，,；;。.）)\]])",
+        r"\1\\*",
+        text,
+    )
 
 
 def page_slug_for_resource(resource: Resource) -> str:
@@ -426,6 +480,7 @@ def privacy_scan(resource: Resource) -> None:
     elif resource.ext not in ATTACHMENT_EXTENSIONS:
         resource.notes.append("未知格式，按附件处理")
 
+    resource.text_excerpt = text[:20000]
     resource.privacy_hits = scan_text_for_privacy(text[:1_000_000], resource.name)
     if resource.rel in PRIVACY_ALLOWLIST and resource.privacy_hits:
         resource.notes.append(f"隐私规则命中已人工放行：{PRIVACY_ALLOWLIST[resource.rel]}")
@@ -452,6 +507,229 @@ def should_include(resource: Resource) -> bool:
     return True
 
 
+SUPPORT_CARD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".agx", ".pptx"}
+
+RESOURCE_TITLE_OVERRIDES = {
+    "signals-and-systems/lecture-notes/topic-2ba38134.pdf": "信号与系统基本概念",
+    "signals-and-systems/lecture-notes/topic-d393816c.pdf": "LTI 系统的时域分析",
+    "signals-and-systems/lecture-notes/topic-1-237a14a2.pdf": "LTI 系统的频域分析：连续时间信号",
+    "signals-and-systems/lecture-notes/topic-2-a47c3a45.pdf": "LTI 系统的频域分析：离散时间信号",
+    "signals-and-systems/lecture-notes/topic-9a861901.pdf": "信号采样与还原、调制与解调",
+    "signals-and-systems/lecture-notes/topic-1115660d.pdf": "连续 LTI 系统的复频域分析",
+    "signals-and-systems/lecture-notes/topic-760788da.pdf": "离散 LTI 系统的复频域分析（z 变换）",
+    "complex-functions/review-outline/2024-2025-8deb7b00.pdf": "2024-2025 秋学期复变函数试题",
+    "complex-functions/review-outline/answers-74659ed2.pdf": "2024-2025 秋学期复变函数试题答案",
+    "complex-functions/past-materials/20-21-6e624427.pdf": "2020 秋冬学期复变函数回忆卷",
+    "complex-functions/past-materials/21-22-3b9ea272.pdf": "2021-2022 复变函数与积分变换期末试题",
+    "complex-functions/past-materials/22-23-fd2d0639.pdf": "2022-2023 秋学期复变函数期末试题",
+    "complex-functions/past-materials/23-24-71cd9f22.pdf": "2023-2024 秋学期复变函数期末试题答案",
+    "complex-functions/review-outline/final-review-09b2ef86.zip": "复变函数期末复习资料包",
+    "complex-functions/assignments/complex-functions-8b97c33b.pdf": "复变函数与拉普拉斯变换习题指导",
+    "complex-functions/assignments/stein-answers-1-d81b4541.pdf": "Stein 复分析习题答案（一）",
+    "complex-functions/assignments/stein-answers-2-2d1b2bc5.pdf": "Stein 复分析习题答案（二）",
+    "complex-functions/other-materials/complex-analysis-stein-f3caaab8.pdf": "Complex Analysis（Stein）教材",
+    "complex-functions/other-materials/complex-functions-e168d239.md": "复变函数数院普通班复习范围",
+    "automatic-control-principles-b/lecture-notes/automatic-control-notes-93759527.pdf": "自动控制理论（乙）课堂笔记",
+    "automatic-control-principles-b/open-book-a4/a4-69b9ece3.pdf": "自动控制理论（乙）半开卷 A4",
+    "automatic-control-principles-b/memory-exams/memory-d78baacd.pdf": "自动控制理论（乙）2024-2025 夏学期期末试题",
+    "robotics-i/lecture-notes/robotics-dca9689a.pdf": "机器人学 I 课堂笔记",
+    "robotics-i/memory-exams/robot-i-memory-3ad6facb.pdf": "机器人学 I 2024-2025 夏学期期末试题",
+}
+
+
+def strip_generated_hash(stem: str) -> str:
+    return re.sub(r"[-_][0-9a-f]{8,12}$", "", stem, flags=re.I).strip()
+
+
+def is_low_information_stem(stem: str) -> bool:
+    clean = strip_generated_hash(stem).strip()
+    lower = clean.lower()
+    patterns = [
+        r"\d+(?:[-_](?:\d+|\(\d+\)|（\d+）))*",
+        r"\d+(?:\(\d+\)|（\d+）)",
+        r"t\d+(?:[_-]\d+)?",
+        r"topic(?:[-_](?:\d+|[0-9a-f]{6,}))*",
+        r"image[-_ ]?\d+",
+        r"resource(?:[-_][0-9a-f]{6,})?",
+        r"(?:微信图片|screenshot|屏幕截图)[-_ ]?.*",
+    ]
+    if any(re.fullmatch(pattern, lower, re.I) for pattern in patterns):
+        return True
+    return lower in {"答案", "answer", "answers", "robotics", "control-theory", "theoretical-mechanics", "complex-functions"}
+
+
+def clean_title_line(line: str) -> str:
+    line = re.sub(r"<[^>]+>", "", line)
+    line = re.sub(r"^#{1,6}\s*", "", line)
+    line = re.sub(r"\s+", " ", line)
+    return line.strip(" \t:-_—")
+
+
+def meaningful_text_lines(text: str) -> list[str]:
+    lines: list[str] = []
+    for raw in text.splitlines():
+        line = clean_title_line(raw)
+        if not line:
+            continue
+        if line.lower() in {"contents", "目录"}:
+            continue
+        if re.fullmatch(r"[\d\s./\\|·.]+", line):
+            continue
+        if len(line) <= 1:
+            continue
+        lines.append(line)
+        if len(lines) >= 40:
+            break
+    return lines
+
+
+def is_bad_title_line(line: str) -> bool:
+    bad_phrases = (
+        "没有答案",
+        "找不到答案",
+        "这份卷子",
+        "后面没有答案",
+        "从括号中选择",
+        "选择正确",
+        "电路图",
+        "输入电压幅值",
+        "在不同情况下",
+        "电流 I",
+        "100k欧姆",
+        "最后，给大家",
+    )
+    if any(phrase in line for phrase in bad_phrases):
+        return True
+    if line in {"机器人工程", "一、选择题"}:
+        return True
+    if re.match(r"[（(]?\d+\s*分[）)]?\s*\d+[.、]", line):
+        return True
+    if re.match(r"\d+[.、]\s*", line) and len(line) > 10:
+        return True
+    if re.match(r"\d+、", line):
+        return True
+    return False
+
+
+def title_from_text(resource: Resource) -> str:
+    lines = meaningful_text_lines(resource.text_excerpt)
+    if not lines:
+        return ""
+
+    first = lines[0]
+    topic_match = re.match(r"主题[一二三四五六七八九十\d]+[：:]\s*(.+)", first)
+    if topic_match:
+        main = topic_match.group(1).strip()
+        if len(lines) > 1:
+            sub_match = re.match(r"[一二三四五六七八九十\d]+[、.．]\s*(.+)", lines[1])
+            if sub_match:
+                return f"{main}：{sub_match.group(1).strip()}"
+        return main
+
+    for line in lines:
+        if is_bad_title_line(line):
+            continue
+        if line.startswith("书名="):
+            line = line.replace("书名=", "").strip()
+        if "CC98论坛" in line:
+            return "模电课本答案与复习资料（CC98）"
+        if line.startswith("学年电路与模拟电子技术"):
+            return "电路与模拟电子技术期末考试回忆卷"
+        if re.search(r"(知识整理|回忆卷|期末|试题|考试|课堂笔记|复习|习题|答案|Chapter|控制论|理论力学|复变函数|机器人学)", line, re.I):
+            return line
+    return first if 4 <= len(first) <= 42 and not is_bad_title_line(first) else ""
+
+
+def course_title(course_name: str, suffix: str) -> str:
+    separator = " " if re.search(r"[A-Za-z0-9]$", course_name) else ""
+    return f"{course_name}{separator}{suffix}"
+
+
+def normalized_file_title(resource: Resource) -> str:
+    stem = strip_generated_hash(Path(resource.name).stem)
+    replacements = {
+        "robotics": "机器人学 I 课堂笔记",
+        "robot-i-memory": "机器人学 I 2024-2025 夏学期期末试题",
+        "automatic-control-notes": "自动控制理论（乙）课堂笔记",
+        "memory": "自动控制理论（乙）2024-2025 夏学期期末试题",
+        "a4": "自动控制理论（乙）半开卷 A4",
+        "control-theory": "控制论 2024-2025 秋冬期末回忆卷",
+        "theoretical-mechanics": "理论力学（乙）2024-2025 秋冬期末回忆卷",
+        "complex-functions": "复变函数复习资料",
+        "final-review": "复变函数期末复习资料包",
+        "stein-answers-1": "Stein 复分析习题答案（一）",
+        "stein-answers-2": "Stein 复分析习题答案（二）",
+        "complex-analysis-stein": "Complex Analysis（Stein）教材",
+        "analog-electronics-review": "模拟电子技术复习资料",
+        "analog-electronics-answers": "模拟电子技术答案整理",
+        "analog-electronics-final-memory": "模拟电子技术期末回忆卷",
+        "analog-electronics": "模拟电子技术资料",
+        "2008-2009-analog-electronics-b-answers": "2008-2009 模电（B）试题答案",
+        "circuit-24-25": "2024-2025 电路与模拟电子技术期末资料",
+        "zj": "浙江大学电路与模拟电子技术习题资料",
+    }
+    if stem.lower() in replacements:
+        return replacements[stem.lower()]
+    lower = stem.lower()
+    if lower == "review-outline" or lower.endswith("-review-outline"):
+        return course_title(resource.course_name, "复习提纲")
+    if lower.endswith("-review-notes"):
+        return course_title(resource.course_name, "复习笔记")
+    if lower.endswith("-memory"):
+        return course_title(resource.course_name, "回忆卷")
+    if lower.endswith("-a4"):
+        return course_title(resource.course_name, "半开卷 A4")
+    chapter = re.fullmatch(r"chapter-(\d+(?:-\d+)?)", stem, re.I)
+    if chapter:
+        return f"{resource.course_name}第 {chapter.group(1).replace('-', '.')} 章资料"
+    circuit = re.fullmatch(r"(\d+)-circuit", stem, re.I)
+    if circuit:
+        return f"电路第 {circuit.group(1)} 章资料"
+    signals = re.fullmatch(r"(\d+)-signals", stem, re.I)
+    if signals:
+        return f"信号专题第 {signals.group(1)} 章资料"
+    stem = stem.replace("_", " ").strip()
+    stem = re.sub(r"\s+", " ", stem)
+    return stem
+
+
+def resource_display_title(resource: Resource, ordinal: int | None = None) -> str:
+    key = resource.dest_rel.replace(os.sep, "/")
+    for fragment, title in RESOURCE_TITLE_OVERRIDES.items():
+        if fragment in key:
+            return title
+
+    stem = strip_generated_hash(Path(resource.name).stem)
+    text_title = title_from_text(resource)
+    if text_title and (is_low_information_stem(stem) or len(stem) < 8 or stem.lower() in resource.course_slug):
+        return text_title
+
+    file_title = normalized_file_title(resource)
+    if file_title and not is_low_information_stem(stem):
+        return file_title
+
+    suffix = f" {ordinal:02d}" if ordinal is not None else ""
+    if resource.course_name and resource.module_label:
+        if resource.ext in {".jpg", ".jpeg", ".png"}:
+            return f"{resource.course_name} · {resource.module_label}配图{suffix}"
+        return f"{resource.course_name} · {resource.module_label}附件{suffix}"
+    return file_title or f"资料{suffix}"
+
+
+def should_show_course_card(resource: Resource, module_items: list[Resource]) -> bool:
+    if resource.ext not in SUPPORT_CARD_EXTENSIONS:
+        return True
+    if not is_low_information_stem(Path(resource.name).stem):
+        return True
+    has_document_sibling = any(
+        item is not resource and item.ext in {".md", ".pdf", ".docx"} for item in module_items
+    )
+    if has_document_sibling:
+        resource.notes.append("隐藏低信息名配套附件卡片，文件仍会保留供文档引用")
+        return False
+    return True
+
+
 def copy_resources(resources: list[Resource]) -> None:
     first_by_hash: dict[str, Resource] = {}
     seen_dest_names: set[str] = set()
@@ -473,8 +751,8 @@ def copy_resources(resources: list[Resource]) -> None:
         first_by_hash[resource.sha256] = resource
 
 
-def resource_card(resource: Resource) -> str:
-    title = html.escape(Path(resource.name).stem)
+def resource_card(resource: Resource, ordinal: int | None = None) -> str:
+    title = html.escape(resource_display_title(resource, ordinal))
     url = html.escape(resource.public_url)
     kind = resource.ext.upper().lstrip(".") or "附件"
     label = html.escape(resource.module_label or resource.topic_label or "资料")
@@ -493,12 +771,6 @@ def resource_card(resource: Resource) -> str:
         f'<a href="{url}" download>下载</a>',
         "</div>",
     ]
-    if resource.ext == ".pdf":
-        card.extend([
-            f'<object class="pdf-preview" data="{url}" type="application/pdf">',
-            f'<p>当前浏览器不支持内嵌 PDF 预览，请 <a href="{url}">下载文件</a> 查看。</p>',
-            "</object>",
-        ])
     card.append("</article>")
     return "\n".join(card)
 
@@ -521,7 +793,11 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
         by_module: dict[str, list[Resource]] = {}
         for item in items:
             by_module.setdefault(item.module_label, []).append(item)
-        tags = [label for _, label in TYPE_ORDER if label in by_module]
+        visible_by_module = {
+            label: [item for item in items if should_show_course_card(item, items)]
+            for label, items in by_module.items()
+        }
+        tags = [label for _, label in TYPE_ORDER if visible_by_module.get(label)]
 
         lines = [
             "---",
@@ -545,11 +821,11 @@ def write_course_pages(resources: list[Resource]) -> tuple[dict[str, dict], dict
             lines.append("")
 
         for _, label in TYPE_ORDER:
-            module_items = sorted(by_module.get(label, []), key=lambda x: x.rel)
+            module_items = sorted(visible_by_module.get(label, []), key=lambda x: x.rel)
             if not module_items:
                 continue
             lines.extend([f"## {label}", "", '<div class="resource-grid">'])
-            lines.extend(resource_card(item) for item in module_items)
+            lines.extend(resource_card(item, index) for index, item in enumerate(module_items, 1))
             lines.extend(["</div>", ""])
 
         (course_dir / "index.md").write_text("\n".join(lines), encoding="utf-8")
