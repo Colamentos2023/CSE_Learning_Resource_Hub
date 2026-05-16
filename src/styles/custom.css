@@ -465,6 +465,16 @@ main h1:not(.hero h1) {
 
   .cn-cursor-canvas {
     mix-blend-mode: multiply;
+    transition: opacity 160ms ease;
+  }
+
+  :root[data-pdf-cursor-hidden] .cn-pointer-glow,
+  :root[data-pdf-cursor-hidden] .cn-cursor-dot,
+  :root[data-pdf-cursor-hidden] .cn-cursor-canvas,
+  body:has(.pdf-preview:hover) .cn-pointer-glow,
+  body:has(.pdf-preview:hover) .cn-cursor-dot,
+  body:has(.pdf-preview:hover) .cn-cursor-canvas {
+    opacity: 0 !important;
   }
 
   :root[data-theme='dark'] .cn-pointer-glow,

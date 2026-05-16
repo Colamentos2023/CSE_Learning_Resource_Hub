@@ -5,6 +5,20 @@ import { fairyDustCursor } from 'cursor-effects';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer = window.matchMedia('(pointer: fine)');
 
+function setPdfCursorHidden(hidden) {
+  document.documentElement.toggleAttribute('data-pdf-cursor-hidden', hidden);
+}
+
+function isPdfPreviewTarget(target) {
+  return target instanceof Element && Boolean(target.closest('.pdf-preview'));
+}
+
+function isPdfPreviewPoint(event) {
+  if (isPdfPreviewTarget(event.target)) return true;
+  const element = document.elementFromPoint(event.clientX, event.clientY);
+  return isPdfPreviewTarget(element);
+}
+
 function enhanceCards() {
   const targets = document.querySelectorAll(
     '.cn-card, .resource-card, .notice-box, .sl-markdown-content > table, .sl-markdown-content > blockquote'
@@ -35,6 +49,12 @@ function enhancePointerGlow() {
   window.addEventListener(
     'pointermove',
     (event) => {
+      if (isPdfPreviewPoint(event)) {
+        setPdfCursorHidden(true);
+        glow.dataset.active = 'false';
+        return;
+      }
+      setPdfCursorHidden(false);
       nextX = event.clientX;
       nextY = event.clientY;
       if (!initialized) {
@@ -52,12 +72,14 @@ function enhancePointerGlow() {
   });
 
   document.querySelectorAll('.pdf-preview').forEach((preview) => {
-    preview.addEventListener('pointerenter', () => {
+    const hideGlow = () => {
+      setPdfCursorHidden(true);
       glow.dataset.active = 'false';
-    });
-    preview.addEventListener('mouseenter', () => {
-      glow.dataset.active = 'false';
-    });
+    };
+    preview.addEventListener('pointerenter', hideGlow);
+    preview.addEventListener('pointerover', hideGlow);
+    preview.addEventListener('mouseenter', hideGlow);
+    preview.addEventListener('mouseover', hideGlow);
   });
 
   const render = () => {
@@ -89,6 +111,13 @@ function enhanceCursorDot() {
   window.addEventListener(
     'pointermove',
     (event) => {
+      if (isPdfPreviewPoint(event)) {
+        setPdfCursorHidden(true);
+        dot.dataset.active = 'false';
+        dot.dataset.press = 'false';
+        return;
+      }
+      setPdfCursorHidden(false);
       nextX = event.clientX;
       nextY = event.clientY;
       if (!initialized) {
@@ -115,11 +144,14 @@ function enhanceCursorDot() {
 
   document.querySelectorAll('.pdf-preview').forEach((preview) => {
     const hideDot = () => {
+      setPdfCursorHidden(true);
       dot.dataset.active = 'false';
       dot.dataset.press = 'false';
     };
     preview.addEventListener('pointerenter', hideDot);
+    preview.addEventListener('pointerover', hideDot);
     preview.addEventListener('mouseenter', hideDot);
+    preview.addEventListener('mouseover', hideDot);
   });
 
   const render = () => {
@@ -227,6 +259,18 @@ function liftCursorCanvases() {
   });
 }
 
+function watchPdfPreviewCursorBoundary() {
+  const hideIfPdfPreview = (event) => {
+    if (isPdfPreviewPoint(event)) setPdfCursorHidden(true);
+  };
+
+  document.addEventListener('pointerover', hideIfPdfPreview, true);
+  document.addEventListener('mouseover', hideIfPdfPreview, true);
+  window.addEventListener('blur', () => {
+    if (isPdfPreviewTarget(document.activeElement)) setPdfCursorHidden(true);
+  });
+}
+
 function init() {
   if (reduceMotion.matches) return;
 
@@ -245,6 +289,7 @@ function init() {
     });
     liftCursorCanvases();
     window.setTimeout(liftCursorCanvases, 200);
+    watchPdfPreviewCursorBoundary();
     enhancePointerGlow();
     enhanceCursorDot();
     enhanceClickBurst();
