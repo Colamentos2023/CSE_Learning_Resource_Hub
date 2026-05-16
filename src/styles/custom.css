@@ -46,6 +46,7 @@ body {
 .site-title img,
 .site-title svg {
   border-radius: 10px;
+  filter: drop-shadow(0 5px 12px rgba(7, 59, 134, 0.16));
 }
 
 .site-title span {
@@ -56,8 +57,13 @@ body {
   color: var(--cn-teal);
 }
 
+.hero {
+  align-items: center !important;
+}
+
 .hero img {
-  max-height: min(34rem, 48vh);
+  width: min(38vw, 30rem) !important;
+  max-height: min(36rem, 54vh);
   object-fit: contain;
   border-radius: 24px;
   filter: drop-shadow(0 26px 52px rgba(7, 59, 134, 0.18));
@@ -68,6 +74,7 @@ body {
 }
 
 .sl-markdown-content h1,
+main h1,
 h1[data-page-title],
 .hero h1 {
   font-family: var(--cn-heading-font);
@@ -80,6 +87,12 @@ h1[data-page-title],
 .hero h1,
 h1[data-page-title] {
   font-family: var(--cn-brand-font);
+}
+
+main h1:not(.hero h1) {
+  color: var(--cn-ink);
+  font-size: clamp(2.05rem, 4vw, 3rem) !important;
+  font-weight: 760;
 }
 
 .hero h1 {
@@ -103,20 +116,28 @@ h1[data-page-title] {
 
 .hero .tagline .cn-hero-cn {
   color: var(--cn-blue);
+  font-family: var(--sl-font);
   font-size: clamp(1.28rem, 2.2vw, 1.72rem);
   font-weight: 720;
 }
 
 .hero .tagline .cn-hero-en {
-  color: var(--sl-color-gray-2);
-  font-family: var(--sl-font);
-  font-size: clamp(0.92rem, 1.42vw, 1.08rem);
-  font-weight: 450;
+  color: color-mix(in srgb, var(--cn-blue) 82%, var(--sl-color-gray-2));
+  font-family: var(--cn-brand-font) !important;
+  font-size: clamp(0.96rem, 1.4vw, 1.16rem);
+  font-weight: 520;
   letter-spacing: 0;
 }
 
 :root[data-theme='dark'] .hero .tagline .cn-hero-cn {
   color: var(--cn-teal);
+}
+
+@media (min-width: 50rem) {
+  .hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr) !important;
+    gap: clamp(2.5rem, 6vw, 6rem) !important;
+  }
 }
 
 .sl-markdown-content h2,
@@ -150,6 +171,12 @@ h1[data-page-title] {
 
 .cn-grid > *,
 .resource-grid > * {
+  margin-top: 0 !important;
+}
+
+.sl-markdown-content .cn-grid > .cn-card,
+.sl-markdown-content .resource-grid > .resource-card {
+  align-self: stretch;
   margin-top: 0 !important;
 }
 
@@ -359,12 +386,11 @@ h1[data-page-title] {
 
   .cn-card,
   .resource-card {
-    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    transition: box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
   }
 
   .cn-card:hover,
   .resource-card:hover {
-    transform: translateY(-4px);
     border-color: color-mix(in srgb, var(--cn-teal) 52%, var(--cn-soft-border));
     box-shadow: var(--cn-shadow-strong);
   }

@@ -12,7 +12,7 @@ function enhanceCards() {
 
   targets.forEach((target, index) => {
     if (target.dataset.aos) return;
-    target.dataset.aos = 'fade-up';
+    target.dataset.aos = 'fade';
     target.dataset.aosDuration = '560';
     target.dataset.aosEasing = 'ease-out-cubic';
     target.dataset.aosDelay = String(Math.min((index % 6) * 35, 175));
@@ -119,12 +119,12 @@ function enhanceCursorDot() {
 }
 
 function enhanceClickBurst() {
-  const burst = (event, intensity = 1) => {
+  const burst = (point, intensity = 1) => {
     const isLight = document.documentElement.dataset.theme === 'light';
     const colors = isLight ? ['#083b86', '#007d76', '#b37b00'] : ['#12d5cc', '#6ee7ff', '#f4c542'];
     const origin = {
-      x: event.clientX / window.innerWidth,
-      y: event.clientY / window.innerHeight,
+      x: point.clientX / window.innerWidth,
+      y: point.clientY / window.innerHeight,
     };
 
     confetti({
@@ -151,9 +151,6 @@ function enhanceClickBurst() {
         disableForReducedMotion: true,
       });
     }, 80);
-    return window.setTimeout(() => {
-      confetti.reset();
-    }, 640);
   };
 
   document.addEventListener('click', (event) => {
@@ -166,11 +163,19 @@ function enhanceClickBurst() {
     if (url.origin !== window.location.origin) return;
     if (url.pathname === window.location.pathname && url.hash) return;
 
-    event.preventDefault();
+    try {
+      sessionStorage.setItem(
+        'cn-click-burst',
+        JSON.stringify({
+          x: event.clientX,
+          y: event.clientY,
+          at: Date.now(),
+        })
+      );
+    } catch {
+      // Ignore storage failures; the local burst still runs.
+    }
     burst(event, 1.25);
-    window.setTimeout(() => {
-      window.location.href = url.href;
-    }, 560);
   });
 
   window.addEventListener(
@@ -182,6 +187,19 @@ function enhanceClickBurst() {
     },
     { passive: true }
   );
+
+  try {
+    const stored = sessionStorage.getItem('cn-click-burst');
+    if (!stored) return;
+    sessionStorage.removeItem('cn-click-burst');
+    const data = JSON.parse(stored);
+    if (!data || Date.now() - data.at > 1800) return;
+    window.setTimeout(() => {
+      burst({ clientX: data.x, clientY: data.y }, 0.95);
+    }, 80);
+  } catch {
+    // Ignore malformed stored animation state.
+  }
 }
 
 function liftCursorCanvases() {

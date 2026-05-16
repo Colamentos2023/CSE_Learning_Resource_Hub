@@ -14,6 +14,7 @@ export default defineConfig({
         src: './src/assets/logo.png',
         alt: 'Control Nexus',
       },
+      favicon: '/favicon.png',
       customCss: [
         '@fontsource-variable/noto-sans-sc',
         '@fontsource-variable/orbitron',
