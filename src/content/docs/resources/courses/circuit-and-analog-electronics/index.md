@@ -3975,20 +3975,6 @@ description: 电路与模拟电子技术课程资料。
 </object>
 </div>
 <div class="resource-card">
-<h3>~$小测题目</h3>
-<div class="resource-meta">
-<span>作业与习题</span>
-<span>DOCX</span>
-<span>162 B</span>
-</div>
-<p>资料说明待补充</p>
-<p class="cn-muted">原始路径：模电/zj_小测题目/~$小测题目.docx</p>
-<div class="resource-actions">
-<a href="/CSE_Learning_Resource_Hub/resources/courses/circuit-and-analog-electronics/assignments/resource-06330c146c-06330c14.docx" target="_blank" rel="noopener">打开</a>
-<a href="/CSE_Learning_Resource_Hub/resources/courses/circuit-and-analog-electronics/assignments/resource-06330c146c-06330c14.docx" download>下载</a>
-</div>
-</div>
-<div class="resource-card">
 <h3>小测题目</h3>
 <div class="resource-meta">
 <span>作业与习题</span>

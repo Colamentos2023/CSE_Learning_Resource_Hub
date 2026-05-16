@@ -400,6 +400,9 @@ def privacy_scan(resource: Resource) -> None:
 
 
 def should_include(resource: Resource) -> bool:
+    if resource.name.startswith("~$"):
+        resource.notes.append("Office 临时文件，未纳入公开资源")
+        return False
     if resource.size == 0:
         resource.notes.append("空文件，未纳入公开资源")
         return False
